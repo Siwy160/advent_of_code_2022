@@ -7,7 +7,6 @@ void main(List<String> arguments) async {
   var commands = input.split("\n").map((e) => e.replaceAll("\r", ""));
   var fileTree = FileTree();
   List<String> currentPath = [];
-  var isListing = false;
   commands.forEach(
     (element) {
       var splitted = element.split(" ");
@@ -15,7 +14,6 @@ void main(List<String> arguments) async {
         //Executing command
         if (splitted[1] == "ls") {
           //Listing contents of current directory
-          isListing = true;
         }
         if (splitted[1] == "cd") {
           //Changing directory
