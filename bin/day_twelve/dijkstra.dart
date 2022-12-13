@@ -18,9 +18,7 @@ class Position {
   int get x => _x;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Position && runtimeType == other.runtimeType && _x == other._x && _y == other._y;
+  bool operator ==(Object other) => other is Position && _x == other._x && _y == other._y;
 
   @override
   int get hashCode => _x.hashCode ^ _y.hashCode;
@@ -43,7 +41,7 @@ class Graph {
 class Node extends LinkedListEntry<Node> {
   final Position _position;
   final int _height;
-  int distance = 0;
+  int distance = 9999999;
   List<Node> adjacentNodes = List.empty(growable: true);
   List<Node> shortestPath = List.empty(growable: true);
 
@@ -56,40 +54,58 @@ class Node extends LinkedListEntry<Node> {
   Position get position => _position;
 
   int get height => _height;
+
+  @override
+  bool operator ==(Object other) => other is Node && _position == other._position;
+
+  @override
+  int get hashCode => _position.hashCode;
 }
 
 List<Node> findShortestPath(Graph graph, Node start, Node end) {
-  List<Node> unsettledNodes = [end];
-  List<Node> settledNodes = List.empty(growable: true);
+  graph.nodes.values.forEach((element) {
+    element.distance = 9999999;
+    element.shortestPath = List.empty(growable: true);
+  });
+  start.distance = 0;
+  Set<Node> unsettledNodes = {start};
+  Set<Node> settledNodes = {};
 
   while (unsettledNodes.isNotEmpty) {
     var currentNode = unsettledNodes.getLowestDistanceNode();
+    if (currentNode == end) {
+      return end.shortestPath;
+    }
     unsettledNodes.remove(currentNode);
     for (Node adjacent in currentNode.adjacentNodes) {
-      var value = (adjacent.height - currentNode.height);
       if (!settledNodes.contains(adjacent)) {
-        calculateMinimumDistance(adjacent, value, currentNode);
+        calculateMinimumDistance(adjacent, currentNode);
         unsettledNodes.add(adjacent);
       }
     }
     settledNodes.add(currentNode);
   }
-  return start.shortestPath;
+  return end.shortestPath;
 }
 
-void calculateMinimumDistance(Node evaluationNode, int edgeWeight, Node sourceNode) {
-  var sourceDistance = sourceNode.distance;
-  if (sourceDistance + edgeWeight < evaluationNode.distance) {
-    evaluationNode.distance = sourceDistance + edgeWeight;
-    var shortestPath = sourceNode.shortestPath;
+void calculateMinimumDistance(Node evaluationNode, Node sourceNode) {
+  var sourceDistance = sourceNode.distance + 1;
+  if (sourceDistance < evaluationNode.distance) {
+    evaluationNode.distance = sourceDistance;
+    List<Node> shortestPath = List.from(sourceNode.shortestPath);
     shortestPath.add(sourceNode);
     evaluationNode.shortestPath = shortestPath;
   }
 }
 
-extension Utils on List<Node> {
+extension Utils on Set<Node> {
   Node getLowestDistanceNode() {
-    sort((element, element1) => element.distance - element1.distance);
-    return last;
+    Node lowestDistance = first;
+    forEach((element) {
+      if (element.distance < lowestDistance.distance) {
+        lowestDistance = element;
+      }
+    });
+    return lowestDistance;
   }
 }

@@ -20,7 +20,7 @@ void main(List<String> arguments) async {
   input.iterateThroughGrid((x, y, char) {
     var current = graph.get(Position(x, y));
     if (current != null) {
-      bool heightCheck(Node? node) => node != null && (node.height - current.height).abs() <= 1;
+      bool heightCheck(Node? node) => node != null && (node.height - current.height) <= 1;
       var top = graph.get(Position(x, y - 1));
       var bottom = graph.get(Position(x, y + 1));
       var left = graph.get(Position(x - 1, y));
@@ -40,19 +40,27 @@ void main(List<String> arguments) async {
     }
   });
 
+  //Part 1
   var shortestPath = findShortestPath(graph, start, end);
-  shortestPath.forEach((element) {
-    print(element.position);
+  print(shortestPath.length);
+  //Part 2
+  graph.nodes.values.forEach((element) {
+    if (element.height == toHeight("a")) {
+      var potentialRoute = findShortestPath(graph, element, end);
+      if (potentialRoute.isNotEmpty && potentialRoute.length < shortestPath.length) {
+        shortestPath = potentialRoute;
+      }
+    }
   });
   print(shortestPath.length);
 }
 
 int toHeight(String input) {
-  int index(String char) => char.codeUnits.first - 'a'.codeUnits.first;
-  if (input == 'S') {
-    return index('a') - 1;
-  } else if (input == 'E') {
-    return index('z') + 1;
+  int index(String char) => char.codeUnits.first;
+  if (input == "S") {
+    return index("a");
+  } else if (input == "E") {
+    return index("z");
   } else {
     return index(input);
   }
